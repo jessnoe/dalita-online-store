@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dalita.py — Tienda</title>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#fbf7f3;
+      --accent:#5b3626;
+      --muted:#8a6f62;
+      --card:#fffaf6;
+      --radius:18px;
+      --container:1100px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Montserrat, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:var(--bg); color:var(--accent);}
+    a{color:inherit; text-decoration:none}
+    .wrap{max-width:var(--container); margin:0 auto; padding:28px}
+
+    /* Header */
+    header{display:flex; align-items:center; justify-content:space-between; gap:18px; background:transparent; padding:10px 28px}
+    .brand{display:flex; align-items:center; gap:14px}
+    .logo img{width:64px; height:64px; object-fit:cover; border-radius:12px; box-shadow:0 6px 18px rgba(91,54,38,0.08)}
+    nav ul{display:flex; gap:18px; list-style:none; padding:0; margin:0}
+    nav a{font-weight:600}
+    .actions{display:flex; gap:12px; align-items:center}
+    .btn{background:var(--accent); color:#fff; padding:8px 12px; border-radius:10px; font-weight:600; border:none; cursor:pointer}
+    .secondary{background:transparent; border:2px solid var(--accent); color:var(--accent); padding:8px 12px; border-radius:10px; cursor:pointer}
+
+    /* Hero */
+    .hero{display:grid; grid-template-columns:1fr 420px; gap:28px; align-items:center; margin:26px 0 42px}
+    .hero-card{background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7)); padding:28px; border-radius:20px}
+    .hero h1{font-family:Merriweather; font-size:40px; margin:0 0 8px}
+    .hero p{color:var(--muted); margin:0 0 18px}
+    .cta-row{display:flex; gap:12px}
+    .hero-image{border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(91,54,38,0.08)}
+    .hero-image img{width:100%; height:100%; object-fit:cover; display:block}
+
+    /* Highlights */
+    .section-title{font-family:Merriweather; font-size:34px; margin:28px 0}
+    .highlights{display:flex; gap:18px; align-items:center}
+    .pill{flex:1; background:var(--card); padding:18px; border-radius:16px; text-align:center}
+    .pill img{width:100%; height:170px; object-fit:cover; border-radius:12px}
+    .pill h4{margin:12px 0 0; font-size:16px}
+
+    /* Categories */
+    .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px}
+    .card{background:var(--card); padding:14px; border-radius:14px; text-align:center; box-shadow:0 6px 18px rgba(91,54,38,0.04)}
+    .card img{width:100%; height:160px; object-fit:cover; border-radius:12px}
+    .explore{margin-top:12px; display:inline-block; padding:8px 12px; border-radius:12px; background:var(--accent); color:#fff; font-weight:600}
+
+    /* Products grid */
+    .products{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:8px}
+    .prod{background:#fff; border-radius:14px; padding:12px; text-align:center; box-shadow:0 6px 18px rgba(91,54,38,0.04)}
+    .prod img{width:100%; height:180px; object-fit:cover; border-radius:10px}
+    .prod .multi-img { display:flex; gap:6px; justify-content:center; margin-bottom:8px; }
+    .prod .multi-img img { width:30%; height:80px; object-fit:cover; border-radius:6px; }
+    .price{color:var(--muted); margin:6px 0}
+    .add{background:var(--accent); color:#fff; padding:8px 10px; border-radius:10px; font-weight:600; border:none; cursor:pointer}
+
+    /* Info icons */
+    .icons{display:flex; gap:22px; margin:30px 0}
+    .icon{flex:1; background:transparent; text-align:center}
+    .icon svg{width:46px; height:46px; display:block; margin:0 auto 8px}
+    .icon p{color:var(--muted); margin:0}
+
+    footer{margin-top:36px; padding:22px 0; border-top:1px solid rgba(91,54,38,0.06)}
+    .footer-row{display:flex; justify-content:space-between; gap:18px}
+
+    /* Modal */
+    .modal{position:fixed; inset:0; display:none; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:20px; z-index:50;}
+    .modal.show{display:flex}
+    .modal-box{background:#fff; border-radius:12px; max-width:900px; width:100%; padding:20px; max-height:90vh; overflow:auto;}
+    .close-btn{float:right; cursor:pointer; font-weight:700}
+
+    /* Cart list */
+    .cart-list{max-height:300px; overflow:auto; margin-top:10px}
+    .cart-row{display:flex; justify-content:space-between; gap:8px; padding:8px 0; border-bottom:1px solid #eee; align-items:center}
+
+    /* Small buttons */
+    .small{padding:6px 10px; border-radius:8px; font-weight:600; cursor:pointer}
+
+    /* Checkout tabs (inside checkout modal) */
+    .checkout-steps{display:flex; gap:8px; margin-bottom:12px}
+    .cs-step{flex:1; text-align:center; padding:10px; border-radius:8px; background:#f3f0ee; cursor:pointer; font-weight:600}
+    .cs-step.active{background:var(--accent); color:#fff}
+
+    .form-row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .form-row .full{grid-column:1/-1}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr;}
+      .grid{grid-template-columns:repeat(2,1fr)}
+      .products{grid-template-columns:repeat(2,1fr)}
+      .form-row{grid-template-columns:1fr}
+    }
+    @media (max-width:600px){
+      .wrap{padding:16px}
+      nav ul{display:none}
+      .grid{grid-template-columns:1fr}
+      .products{grid-template-columns:1fr}
+      .highlights{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="brand" style="padding-left:28px;">
+      <div class="logo">
+        <img src="https://i.imgur.com/2G57LLA.jpeg" alt="Dalita.py logo">
+      </div>
+      <div>
+        <div style="font-weight:700; font-family:Merriweather; font-size:18px">DALÍTA</div>
+        <div style="font-size:12px; color:var(--muted)">Atelier • Confección & Macramé</div>
+      </div>
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#catalog">Catálogo</a></li>
+        <li><a href="#about">Envíos</a></li>
+        <li><a href="#contact" data-contact-trigger aria-haspopup="dialog" aria-controls="contactModal">Contacto</a></li>
+      </ul>
+    </nav>
+
+    <div class="actions" style="padding-right:28px;">
+      <button class="secondary small" type="button" data-contact-trigger aria-haspopup="dialog" aria-controls="contactModal">Contacto</button>
+      <button class="btn small" onclick="openModal('loginModal')">Iniciar sesión</button>
+      <button class="btn small" onclick="openModal('cartModal')">🛒 Carrito (<span id="cart-count">0</span>)</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HERO -->
+    <section id="inicio" class="hero">
+      <div class="hero-card">
+        <h1>Hecho a mano con amor</h1>
+        <p>Vestidos a medida, decoración en macramé y accesorios únicos. Calidad, diseño y piezas limitadas desde nuestro atelier.</p>
+        <div class="cta-row">
+          <button class="btn" onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">Ver catálogo</button>
+          <button class="secondary" onclick="window.open('https://wa.me/595986941704?text=Hola%2C%20quiero%20agendar%20una%20cita.', '_blank')">Reserva tu cita</button>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="https://i.imgur.com/qRtB1Dh.png" alt="Hero Dalita" style="width:100%; height:100%; min-height:260px">
+      </div>
+    </section>
+
+    <!-- DESTACADOS -->
+    <h2 class="section-title">Destacados</h2>
+    <div class="highlights">
+      <div class="pill">
+        <img src="https://i.imgur.com/yTiCmDw.png" alt="Vestido de novia">
+        <h4>Vestido de novia</h4>
+      </div>
+      <div class="pill">
+        <img src="https://i.imgur.com/MjQGCzM.png" alt="Vestido de 15">
+        <h4>Vestido de 15</h4>
+      </div>
+      <div class="pill">
+        <img src="https://i.imgur.com/wgOHNZU.png" alt="Deco macramé">
+        <h4>Deco en macramé</h4>
+      </div>
+      <div class="pill">
+        <img src="https://i.imgur.com/pkchl30.png" alt="Scrunchies">
+        <h4>Accesorios</h4>
+      </div>
+    </div>
+
+    <!-- CATEGORIAS -->
+    <h2 class="section-title">Categorías principales</h2>
+    <div class="grid">
+      <div class="card">
+        <img src="https://i.imgur.com/7rgpKp9.png" alt="Vestimenta">
+        <div style="font-weight:700; margin-top:8px">Vestimenta</div>
+        <a class="explore" href="#catalog">Explorar</a>
+      </div>
+      <div class="card">
+        <img src="https://i.imgur.com/qRtB1Dh.png" alt="Macramé">
+        <div style="font-weight:700; margin-top:8px">Macramé</div>
+        <a class="explore" href="#catalog">Explorar</a>
+      </div>
+      <div class="card">
+        <img src="https://i.imgur.com/Bl2W9S4.png" alt="Bijouterie">
+        <div style="font-weight:700; margin-top:8px">Bijouterie</div>
+        <a class="explore" href="#catalog">Explorar</a>
+      </div>
+      <div class="card">
+        <img src="https://i.imgur.com/pkchl30.png" alt="Scrunchies">
+        <div style="font-weight:700; margin-top:8px">Accesorios</div>
+        <a class="explore" href="#catalog">Explorar</a>
+      </div>
+    </div>
+
+    <!-- CATALOGO -->
+    <h2 class="section-title" id="catalog">Catálogo de Productos</h2>
+    <div class="products" id="productsGrid">
+      <!-- productos renderizados por JS -->
+    </div>
+
+    <!-- ENVIOS -->
+    <h2 class="section-title" id="about">Envíos y pedidos</h2>
+    <div class="icons">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h15v11H3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p>Delivery en Asunción y alrededores</p>
+      </div>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p>Envíos nacionales</p>
+      </div>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>
+        <p>Pick-up disponible</p>
+      </div>
+    </div>
+
+    <!-- FOOTER / CONTACT -->
+    <footer id="contact">
+      <div class="wrap footer-row" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700; font-family:Merriweather; font-size:18px">DALÍTA</div>
+          <div style="color:var(--muted); margin-top:6px">Confección a medida • Atelier • Macramé</div>
+          <div style="margin-top:10px">📱 <a href="https://wa.me/595986941704" target="_blank">0986 941 704</a> &nbsp; • &nbsp; ✉️ <a href="mailto:hola@dalita.py">hola@dalita.py</a></div>
+        </div>
+        <div style="text-align:right">
+          <div style="margin-bottom:8px"><strong>Síguenos</strong></div>
+          <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center">
+            <a href="https://www.instagram.com/dalitapy" target="_blank">@dalitapy</a>
+            <a href="https://wa.me/595986941704" target="_blank">WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- MODAL: CARRITO -->
+  <div class="modal" id="cartModal" aria-hidden="true">
+    <div class="modal-box">
+      <div style="display:flex; align-items:center; justify-content:space-between">
+        <h3>🛒 Tu carrito</h3>
+        <button class="close-btn" onclick="closeModal('cartModal')">✕</button>
+      </div>
+      <div id="cartList" class="cart-list"></div>
+
+      <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center">
+        <div><strong>Total:</strong> <span id="cartTotal">Gs. 0</span></div>
+        <div>
+          <button class="btn small" onclick="clearCart()">Vaciar</button>
+          <button class="btn" onclick="proceedToCheckout()">Continuar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LOGIN -->
+  <div class="modal" id="loginModal" aria-hidden="true">
+    <div class="modal-box">
+      <div style="display:flex; align-items:center; justify-content:space-between">
+        <h3>Iniciar sesión</h3>
+        <button class="close-btn" onclick="closeModal('loginModal')">✕</button>
+      </div>
+      <p>Inicio de sesión simulado (solo para demo)</p>
+      <input id="inputEmail" type="email" placeholder="Correo electrónico" style="width:100%; padding:10px; margin:8px 0; border-radius:8px; border:1px solid #ddd">
+      <input id="inputPass" type="password" placeholder="Contraseña" style="width:100%; padding:10px; margin:8px 0; border-radius:8px; border:1px solid #ddd">
+      <div style="display:flex; gap:8px; margin-top:8px">
+        <button class="btn" onclick="login()">Ingresar</button>
+        <button class="small" onclick="closeModal('loginModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CHECKOUT (3 pasos dentro) -->
+  <div class="modal" id="checkoutModal" aria-hidden="true">
+    <div class="modal-box">
+      <div style="display:flex; align-items:center; justify-content:space-between">
+        <h3>Finalizar compra</h3>
+        <button class="close-btn" onclick="closeModal('checkoutModal')">✕</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <!-- Steps visual -->
+        <div class="checkout-steps">
+          <div class="cs-step active" data-step="1" onclick="checkoutGoto(1)">1. Tus datos</div>
+          <div class="cs-step" data-step="2" onclick="checkoutGoto(2)">2. Envío</div>
+          <div class="cs-step" data-step="3" onclick="checkoutGoto(3)">3. Pago</div>
+        </div>
+
+        <!-- Step 1 -->
+        <div id="checkout-step-1" class="checkout-step">
+          <div class="form-row">
+            <div><label>Nombre*</label><input id="c_name" type="text" /></div>
+            <div><label>Apellido*</label><input id="c_last" type="text" /></div>
+            <div class="full"><label>Email*</label><input id="c_email" type="email" /></div>
+            <div class="full"><label>Teléfono*</label><input id="c_phone" type="tel" /></div>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px">
+            <button class="small" onclick="closeModal('checkoutModal')">Cancelar</button>
+            <button class="btn" onclick="checkoutGoto(2)">Siguiente</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="checkout-step-2" class="checkout-step" style="display:none">
+          <div class="form-row">
+            <div class="full"><label>Calle principal*</label><input id="c_street" type="text" /></div>
+            <div><label>Nº*</label><input id="c_number" type="text" /></div>
+            <div><label>Cruzamiento</label><input id="c_cross" type="text" /></div>
+            <div><label>Ciudad / Localidad*</label><input id="c_city" type="text" value=" " /></div>
+            <div><label>Horario de entrega</label>
+              <select id="c_time"><option>Mañana</option><option>Tarde</option><option>Noche</option></select>
+            </div>
+            <div class="full"><label>Observaciones</label><textarea id="c_notes" rows="2"></textarea></div>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px">
+            <button class="small" onclick="checkoutGoto(1)">Anterior</button>
+            <button class="btn" onclick="checkoutGoto(3)">Siguiente</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="checkout-step-3" class="checkout-step" style="display:none">
+          <div>
+            <label>RUC / C.I.</label>
+            <input id="c_doc" type="text" />
+          </div>
+          <div>
+            <label>Nombre o Razón Social</label>
+            <input id="c_razon" type="text" />
+          </div>
+
+          <div style="margin-top:12px">
+            <strong>Seleccioná la forma de pago</strong>
+            <div style="display:grid; gap:8px; margin-top:8px;">
+              <label style="display:flex; gap:10px; align-items:center;"><input type="radio" name="payMethod" value="tarjeta" checked> Tarjeta débito/crédito (en línea)</label>
+              <label style="display:flex; gap:10px; align-items:center;"><input type="radio" name="payMethod" value="qr"> Pago QR</label>
+              <label style="display:flex; gap:10px; align-items:center;"><input type="radio" name="payMethod" value="zimple"> Billetera ZIMPLE</label>
+              <label style="display:flex; gap:10px; align-items:center;"><input type="radio" name="payMethod" value="efectivo"> Pago en efectivo (contra entrega)</label>
+              <label style="display:flex; gap:10px; align-items:center;"><input type="radio" name="payMethod" value="tarjeta_cod"> Tarjeta (contra entrega)</label>
+            </div>
+          </div>
+  <!-- 🔄 Contenedor dinámico para QR o formulario de tarjeta -->
+  <div id="payment-dynamic" style="margin-top:16px;"></div>
+
+  <!-- 💰 Total a pagar -->
+  <div id="total-display" style="margin-top:16px; font-weight:bold; font-size:16px;">
+    Total a pagar: ₲ <span id="cart-total">0</span>
+  </div>
+
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px">
+            <button class="small" onclick="checkoutGoto(2)">Anterior</button>
+            <button class="btn" onclick="confirmPurchase()">Confirmar compra</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONTACTO -->
+  <div class="modal" id="contactModal" aria-hidden="true">
+    <div class="modal-box">
+      <div style="display:flex; align-items:center; justify-content:space-between">
+        <h3>Contacto</h3>
+        <button class="close-btn" onclick="closeModal('contactModal')">✕</button>
+      </div>
+      <p>📱 WhatsApp: <a href="https://wa.me/595986941704" target="_blank" rel="noopener">0986 941 704</a></p>
+      <p>📷 Instagram: <a href="https://www.instagram.com/dalitapy" target="_blank" rel="noopener">@dalitapy</a></p>
+      <p>✉️ Correo: <a href="mailto:hola@dalita.py">hola@dalita.py</a></p>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- Productos (lista completa usando Imgur links) ----------
+       - precios en guaraníes (0 = Consultar)
+       - scrunchie2 REMOVIDO según tu pedido
+    */
+    const PRODUCTS = [
+      { id: "uniforme", title: "Uniforme", imgs:["https://i.imgur.com/7rgpKp9.png"], price:120000 },
+      { id: "pulsera1", title: "Pulsera macramé", imgs:["https://i.imgur.com/PT3ilZz.png"], price:15000 },
+      { id: "pulsera2", title: "Pulsera macramé", imgs:["https://i.imgur.com/ftfEv8F.png"], price:15000 },
+      { id: "pulsera3", title: "Pulsera macramé", imgs:["https://i.imgur.com/F1edVL5.png"], price:15000 },
+      { id: "vestido_novia", title: "Vestido de novia", imgs:["https://i.imgur.com/yTiCmDw.png"], price:0 },
+      { id: "vestido_xv", title: "Vestido de XV", imgs:["https://i.imgur.com/MjQGCzM.png"], price:0 },
+      { id: "bolso1", title: "Bolso macramé", imgs:["https://i.imgur.com/qRtB1Dh.png"], price:50000 },
+      { id: "bolso2", title: "Bolso macramé", imgs:["https://i.imgur.com/FTg1DLw.png"], price:50000 },
+      { id: "decoracion", title: "Decoración en macramé", imgs:["https://i.imgur.com/wgOHNZU.png"], price:0 },
+      { id: "souvenir1", title: "Souvenir macramé", imgs:["https://i.imgur.com/ek3HZUb.png"], price:6000 },
+      { id: "souvenir2", title: "Souvenir macramé", imgs:["https://i.imgur.com/ZyAnELH.png"], price:6000 },
+      { id: "souvenir3", title: "Souvenir macramé", imgs:["https://i.imgur.com/G8tIyuM.png"], price:6000 },
+      { id: "portavaso", title: "Portavaso macramé", imgs:["https://i.imgur.com/ce0X6hT.png"], price:10000 },
+      { id: "dije", title: "Dije bijouterie", imgs:["https://i.imgur.com/Bl2W9S4.png"], price:0 },
+      { id: "collar1", title: "Collar bijouterie", imgs:["https://i.imgur.com/MKBOvNt.png"], price:0 },
+      { id: "collar2", title: "Collar bijouterie", imgs:["https://i.imgur.com/wTvcUX0.png"], price:0 },
+      { id: "collar3", title: "Collar bijouterie", imgs:["https://i.imgur.com/pZ7l2EJ.png"], price:0 },
+      { id: "dije_plata1", title: "Dije en plata", imgs:["https://i.imgur.com/9ff4EGM.png"], price:0 },
+      { id: "dije_plata2", title: "Dije en plata", imgs:["https://i.imgur.com/styqP0W.png"], price:0 },
+      { id: "strap", title: "Strap", imgs:["https://i.imgur.com/jg7jR0C.png"], price:0 },
+      { id: "scrunchie1", title: "Scrunchie", imgs:["https://i.imgur.com/pkchl30.png"], price:6000 }
+    ];
+
+    // Carrito (persistente)
+    let cart = JSON.parse(localStorage.getItem('dalita_cart') || '[]');
+    let user = JSON.parse(localStorage.getItem('dalita_user') || 'null');
+
+    // Render productos
+    const productsGrid = document.getElementById('productsGrid');
+    function renderProducts(){
+      productsGrid.innerHTML = '';
+      PRODUCTS.forEach(p=>{
+        const el = document.createElement('div');
+        el.className = 'prod';
+        // multi images small preview
+        if(p.imgs.length > 1){
+          const multi = document.createElement('div');
+          multi.className = 'multi-img';
+          p.imgs.slice(0,3).forEach(src=>{
+            const im = document.createElement('img');
+            im.src = src;
+            im.alt = p.title;
+            multi.appendChild(im);
+          });
+          el.appendChild(multi);
+        } else {
+          const img = document.createElement('img');
+          img.src = p.imgs[0];
+          img.alt = p.title;
+          el.appendChild(img);
+        }
+        const title = document.createElement('div');
+        title.style.fontWeight = 700;
+        title.style.marginTop = '10px';
+        title.innerText = p.title;
+        el.appendChild(title);
+
+        const price = document.createElement('div');
+        price.className = 'price';
+        price.innerText = (p.price > 0) ? `Gs. ${p.price.toLocaleString()}` : 'Consultar';
+        el.appendChild(price);
+
+        const btn = document.createElement('button');
+        btn.className = 'add';
+        btn.innerText = 'Agregar al carrito';
+        btn.onclick = ()=> addToCart(p.id);
+        el.appendChild(btn);
+
+        productsGrid.appendChild(el);
+      });
+    }
+
+    // Cart functions
+    function saveCart(){
+      localStorage.setItem('dalita_cart', JSON.stringify(cart));
+      renderCartCount();
+      renderCartList();
+    }
+
+    function addToCart(productId){
+      const prod = PRODUCTS.find(x=>x.id===productId);
+      if(!prod) return alert('Producto no encontrado');
+      cart.push({ id: prod.id, title: prod.title, price: prod.price });
+      saveCart();
+      openModal('cartModal');
+    }
+
+    function removeFromCart(index){
+      cart.splice(index,1);
+      saveCart();
+    }
+    function clearCart(){
+      if(!confirm('¿Vaciar el carrito?')) return;
+      cart = [];
+      saveCart();
+    }
+
+    function cartTotal(){
+      return cart.reduce((s,i)=> s + (i.price || 0), 0);
+    }
+
+    function renderCartCount(){
+      document.getElementById('cart-count').innerText = cart.length;
+    }
+
+    function renderCartList(){
+      const cont = document.getElementById('cartList');
+      cont.innerHTML = '';
+      if(cart.length === 0){
+        cont.innerHTML = '<p>Tu carrito está vacío.</p>';
+        document.getElementById('cartTotal').innerText = 'Gs. 0';
+        return;
+      }
+      cart.forEach((item, idx)=>{
+        const row = document.createElement('div');
+        row.className = 'cart-row';
+        const left = document.createElement('div');
+        left.innerText = item.title + (item.price>0 ? ` — Gs. ${item.price.toLocaleString()}` : ' — Consultar');
+        const right = document.createElement('div');
+        const del = document.createElement('button');
+        del.className = 'small';
+        del.innerText = 'Eliminar';
+        del.onclick = ()=> { removeFromCart(idx); };
+        right.appendChild(del);
+        row.appendChild(left);
+        row.appendChild(right);
+        cont.appendChild(row);
+      });
+      document.getElementById('cartTotal').innerText = `Gs. ${cartTotal().toLocaleString()}`;
+    }
+
+    // Modal helpers
+    function openModal(id){
+      document.getElementById(id).classList.add('show');
+    }
+    function closeModal(id){
+      document.getElementById(id).classList.remove('show');
+    }
+
+    // Login (simulado)
+    function login(){
+      const email = document.getElementById('inputEmail').value.trim();
+      if(!email) return alert('Ingresa un correo');
+      user = { email };
+      localStorage.setItem('dalita_user', JSON.stringify(user));
+      closeModal('loginModal');
+      alert('Has ingresado como ' + email + ' (simulado)');
+    }
+
+    // Checkout process
+    function proceedToCheckout(){
+      if(cart.length === 0) { alert('Tu carrito está vacío'); return; }
+      user = JSON.parse(localStorage.getItem('dalita_user') || 'null');
+      if(!user){
+        closeModal('cartModal');
+        openModal('loginModal');
+        return;
+      }
+      // open checkout modal and start at step 1
+      openModal('checkoutModal');
+      checkoutGoto(1);
+      renderCheckoutSummary();
+    }
+
+    function renderCheckoutSummary(){
+      // (summary shown in step 3 area via render)
+      const items = cart.map(i => `${i.title} ${i.price>0 ? '— Gs. '+i.price.toLocaleString() : '— Consultar'}`).join('\n');
+      // we'll show within checkout step 3 when needed
+    }
+
+    function checkoutGoto(step){
+      // step buttons visual
+      const steps = document.querySelectorAll('.cs-step');
+      steps.forEach(s=> s.classList.remove('active'));
+      if(steps[step-1]){
+        steps[step-1].classList.add('active');
+      }
+      // hide all steps
+      document.querySelectorAll('[id^="checkout-step-"]').forEach(e=> e.style.display='none');
+      const targetStep = document.getElementById('checkout-step-'+step);
+      if(targetStep){
+        targetStep.style.display = 'block';
+      }
+      if(step === 3){
+        actualizarPagoStep3();
+      }
+    }
+
+    function confirmPurchase(){
+      const method = document.querySelector('input[name="payMethod"]:checked') ? document.querySelector('input[name="payMethod"]:checked').value : 'no seleccionado';
+      closeModal('checkoutModal');
+      closeModal('cartModal');
+      cart = [];
+      saveCart();
+      alert(`Compra simulada confirmada con método: ${method}. Gracias por tu pedido!`);
+    }
+
+    function setupContactTriggers(){
+      document.querySelectorAll('[data-contact-trigger]').forEach(el => {
+        el.addEventListener('click', (event)=>{
+          event.preventDefault();
+          openModal('contactModal');
+        });
+      });
+    }
+
+    // init
+    (function init(){
+      renderProducts();
+      renderCartCount();
+      renderCartList();
+      setupContactTriggers();
+      document.querySelectorAll('.modal').forEach(m=>{
+        m.addEventListener('click', (e)=>{
+          if(e.target === m) m.classList.remove('show');
+        });
+      });
+    })();
+  </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+let pagoListenersListos = false;
+
+function mostrarTotalEnStep3() {
+  const cart = JSON.parse(localStorage.getItem('dalita_cart') || '[]');
+  const total = cart.reduce((s, i) => s + (i.price || 0), 0);
+  const totalSpan = document.getElementById('cart-total');
+  if (totalSpan) {
+    totalSpan.textContent = total.toLocaleString('es-PY');
+  }
+  return total;
+}
+
+function renderPagoDinamico(total) {
+  const dynamicContainer = document.getElementById('payment-dynamic');
+  if (!dynamicContainer) return;
+
+  dynamicContainer.innerHTML = '';
+  const selected = document.querySelector('input[name="payMethod"]:checked');
+  if (!selected) return;
+
+  if (selected.value === 'qr') {
+    const qrDiv = document.createElement('div');
+    qrDiv.id = 'qrcode';
+    dynamicContainer.appendChild(qrDiv);
+
+    if (typeof QRCode === 'function') {
+      new QRCode(qrDiv, {
+        text: `https://tu-enlace-de-pago.com?monto=${total}`,
+        width: 128,
+        height: 128
+      });
+    }
+  } else if (selected.value === 'tarjeta') {
+    dynamicContainer.innerHTML = `
+      <div style="display:grid; gap:8px;">
+        <label>Número de tarjeta<input type="text" placeholder="1234 5678 9012 3456" /></label>
+        <label>CVV<input type="text" placeholder="123" /></label>
+        <label>Fecha de expiración<input type="text" placeholder="MM/AA" /></label>
+      </div>
+    `;
+  }
+}
+
+function actualizarPagoStep3() {
+  asegurarOyentesPago();
+  const total = mostrarTotalEnStep3();
+  renderPagoDinamico(total);
+}
+
+function asegurarOyentesPago() {
+  if (pagoListenersListos) return;
+  document.querySelectorAll('input[name="payMethod"]').forEach(radio => {
+    radio.addEventListener('change', actualizarPagoStep3);
+  });
+  pagoListenersListos = true;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  asegurarOyentesPago();
+  actualizarPagoStep3();
+});
+
+if (document.readyState !== 'loading') {
+  actualizarPagoStep3();
+}
+</script>
+</body>
+</html>
